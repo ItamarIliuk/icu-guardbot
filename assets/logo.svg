@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- ICU-GuardBot: escudo (guarda) com rosto de robô cujo visor mostra um traçado de sinal vital. Cor da marca: #12A4A0 -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16B5AE"/>
+      <stop offset="1" stop-color="#0B5F6B"/>
+    </linearGradient>
+  </defs>
+  <!-- escudo -->
+  <path d="M256 28 L444 92 V236 C444 350 368 438 256 484 C144 438 68 350 68 236 V92 Z" fill="url(#g)"/>
+  <path d="M256 28 L444 92 V236 C444 350 368 438 256 484 C144 438 68 350 68 236 V92 Z" fill="none" stroke="#0A4A55" stroke-width="6" opacity=".35"/>
+  <!-- antena -->
+  <line x1="256" y1="104" x2="256" y2="146" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="256" cy="96" r="16" fill="#FFFFFF"/>
+  <!-- cabeça -->
+  <rect x="140" y="146" width="232" height="190" rx="46" fill="#FFFFFF"/>
+  <!-- visor -->
+  <rect x="164" y="186" width="184" height="104" rx="30" fill="#0B4F5A"/>
+  <!-- traçado de sinal vital no visor -->
+  <polyline points="176,240 214,240 228,240 240,206 256,272 270,222 282,240 336,240"
+            fill="none" stroke="#3EF0D6" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- orelhas / sensores -->
+  <rect x="118" y="206" width="22" height="70" rx="10" fill="#FFFFFF"/>
+  <rect x="372" y="206" width="22" height="70" rx="10" fill="#FFFFFF"/>
+  <!-- cruz discreta (saúde) -->
+  <path d="M244 368 h24 v24 h24 v24 h-24 v24 h-24 v-24 h-24 v-24 h24 z" fill="#FFFFFF" opacity=".92"/>
+</svg>

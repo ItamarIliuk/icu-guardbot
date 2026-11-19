@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICU-GuardBot</title>
+<meta name="description" content="ICU-GuardBot: a research robot that helps ICU nurses notice early signs of sepsis. Simulation-first with NVIDIA Isaac Sim and Omniverse. LABRIOT, UTFPR, Brazil.">
+<meta property="og:title" content="ICU-GuardBot">
+<meta property="og:description" content="A research robot that helps ICU nurses notice early signs of sepsis.">
+<meta property="og:image" content="assets/img/torso-bedside.png">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#12A4A0; --brand-deep:#0B5F6B; --accent:#3EF0D6;
+  --bg:#F6FAFA; --surface:#FFFFFF; --text:#10282C; --muted:#4F6A6E; --line:#D9E6E6;
+  --warn-bg:#FFF6E5; --warn-line:#F0C674; --warn-text:#5A4210;
+  --radius:14px; --maxw:1080px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1618; --surface:#12222A; --text:#E3F1F1; --muted:#9DB6B8; --line:#24393F;
+    --brand:#2CC2BB; --warn-bg:#2A2414; --warn-line:#7A6120; --warn-text:#F3DFA8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1618; --surface:#12222A; --text:#E3F1F1; --muted:#9DB6B8; --line:#24393F;
+  --brand:#2CC2BB; --warn-bg:#2A2414; --warn-line:#7A6120; --warn-text:#F3DFA8;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+img{max-width:100%;height:auto;display:block}
+a{color:var(--brand)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 16px}
+html[lang="en"] [lang="pt"], html[lang="pt"] [lang="en"]{display:none}
+
+header.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:12px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;text-decoration:none;color:var(--text)}
+.brand img{width:32px;height:32px}
+nav.links{margin-left:auto;display:flex;gap:18px;font-size:14px}
+nav.links a{color:var(--muted);text-decoration:none}
+nav.links a:hover{color:var(--text)}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.lang button{border:0;background:transparent;color:var(--muted);padding:4px 10px;font:600 12px Inter,sans-serif;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--brand);color:#fff}
+@media (max-width:760px){nav.links{display:none}.lang{margin-left:auto}}
+
+.hero{padding:56px 0 32px}
+.hero .grid{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
+@media (max-width:860px){.hero .grid{grid-template-columns:1fr}}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.badge{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.badge.research{border-color:var(--warn-line);color:var(--warn-text);background:var(--warn-bg)}
+h1{font-size:clamp(34px,5vw,52px);line-height:1.08;margin:0 0 14px;letter-spacing:-.02em}
+h1 span{color:var(--brand)}
+.lede{font-size:19px;color:var(--muted);margin:0 0 24px}
+.cta{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-block;padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--brand)}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.ghost{color:var(--brand)}
+.shot{border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.shot figcaption{font-size:13px;color:var(--muted);padding:10px 14px}
+
+section{padding:48px 0;border-top:1px solid var(--line)}
+h2{font-size:28px;margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 28px;max-width:760px}
+
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:s}
+@media (max-width:900px){.flow{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.flow{grid-template-columns:1fr}}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;position:relative}
+.step::before{counter-increment:s;content:counter(s);display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;font-weight:700;font-size:14px;margin-bottom:10px}
+.step h3{margin:0 0 6px;font-size:17px}
+.step p{margin:0;color:var(--muted);font-size:15px}
+.where{display:inline-block;margin-top:10px;font-size:12px;font-weight:600;color:var(--brand-deep);background:color-mix(in srgb,var(--brand) 14%,transparent);padding:2px 8px;border-radius:6px}
+:root[data-theme="dark"] .where{color:var(--accent)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .where{color:var(--accent)}}
+
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:860px){.cards{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.card h3{margin:0 0 6px;font-size:17px}
+.card p,.card li{color:var(--muted);font-size:15px}
+.card ul{margin:0;padding-left:18px}
+
+.gallery{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:700px){.gallery{grid-template-columns:1fr}}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
+@media (max-width:760px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.stat b{display:block;font-size:26px;color:var(--brand);line-height:1.2}
+.stat span{font-size:13px;color:var(--muted)}
+
+.roadmap{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.roadmap li{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.dot{flex:none;width:12px;height:12px;border-radius:50%;margin-top:7px}
+.done .dot{background:var(--brand)} .doing .dot{background:#E3A008} .next .dot{background:transparent;border:2px solid var(--muted)}
+.roadmap small{display:block;color:var(--muted)}
+
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{font-size:13px;padding:5px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.tag.nv{border-color:color-mix(in srgb,var(--brand) 50%,var(--line))}
+.tag em{font-style:normal;color:var(--muted)}
+
+.notice{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn-text);border-radius:var(--radius);padding:18px}
+.notice h3{margin:0 0 6px}
+
+footer{padding:32px 0 48px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer p{margin:6px 0}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#"><img src="assets/logo.svg" alt="">ICU-GuardBot</a>
+    <nav class="links">
+      <a href="#how"><span lang="en">How it works</span><span lang="pt">Como funciona</span></a>
+      <a href="#sim"><span lang="en">Simulation</span><span lang="pt">Simulação</span></a>
+      <a href="#status"><span lang="en">Status</span><span lang="pt">Estado</span></a>
+      <a href="#team"><span lang="en">Team</span><span lang="pt">Equipe</span></a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-set-lang="pt" aria-pressed="false">PT</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="hero"><div class="wrap grid">
+  <div>
+    <div class="badges">
+      <span class="badge research"><span lang="en">Research prototype</span><span lang="pt">Protótipo de pesquisa</span></span>
+      <span class="badge">LABRIOT · UTFPR</span>
+      <span class="badge">NVIDIA Omniverse Ambassador project</span>
+    </div>
+    <h1>ICU-<span>GuardBot</span></h1>
+    <p class="lede" lang="en">A bedside robot that helps ICU nurses notice early signs of sepsis, by watching the data that is already at the bedside and flagging trends for the team to review.</p>
+    <p class="lede" lang="pt">Um robô de beira de leito que ajuda a enfermagem da UTI a perceber cedo sinais de sepse, observando os dados que já estão ao lado do paciente e sinalizando tendências para a equipe avaliar.</p>
+    <div class="cta">
+      <a class="btn primary" href="#how"><span lang="en">How it works</span><span lang="pt">Como funciona</span></a>
+      <a class="btn ghost" href="#status"><span lang="en">Project status</span><span lang="pt">Estado do projeto</span></a>
+    </div>
+  </div>
+  <figure class="shot" style="margin:0">
+    <img src="assets/img/torso-bedside.png" width="1280" height="720" alt="Simulated ICU bedside with the robot's aluminum torso and two arms next to a hospital bed, an IV pole and a patient monitor">
+    <figcaption><span lang="en">Digital twin in NVIDIA Isaac Sim: the bimanual torso next to an ICU bed.</span><span lang="pt">Gêmeo digital no NVIDIA Isaac Sim: o torso com dois braços ao lado de um leito de UTI.</span></figcaption>
+  </figure>
+</div></div>
+
+<section id="why"><div class="wrap">
+  <h2><span lang="en">Why sepsis</span><span lang="pt">Por que sepse</span></h2>
+  <p class="sub" lang="en">Sepsis is one of the leading causes of death in intensive care, and recognizing it early makes a difference. The signals are spread across devices and charts: the monitor, the thermometer, the urine bag, the lab results. Nurses check them on rounds, between many other tasks. ICU-GuardBot keeps watching those signals between rounds and brings changes to the team's attention.</p>
+  <p class="sub" lang="pt">A sepse é uma das principais causas de morte em terapia intensiva, e reconhecê-la cedo faz diferença. Os sinais estão espalhados: o monitor, o termômetro, a bolsa de urina, os exames. A enfermagem confere tudo nas rondas, entre muitas outras tarefas. O ICU-GuardBot continua observando esses sinais entre as rondas e leva as mudanças à atenção da equipe.</p>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <h2><span lang="en">How it works</span><span lang="pt">Como funciona</span></h2>
+  <p class="sub" lang="en">The robot reads what is already at the bedside, without connecting to or changing any medical equipment. Identifiable data never leaves the hospital.</p>
+  <p class="sub" lang="pt">O robô lê o que já está à beira do leito, sem se conectar nem alterar nenhum equipamento médico. Dados que identificam o paciente não saem do hospital.</p>
+  <div class="flow">
+    <div class="step">
+      <h3><span lang="en">Read the monitor</span><span lang="pt">Ler o monitor</span></h3>
+      <p lang="en">Wrist cameras point at the patient monitor and read heart rate, SpO2, blood pressure and respiratory rate from the screen.</p>
+      <p lang="pt">As câmeras dos punhos apontam para o monitor e leem frequência cardíaca, SpO2, pressão arterial e frequência respiratória na tela.</p>
+      <span class="where"><span lang="en">on the robot</span><span lang="pt">no robô</span></span>
+    </div>
+    <div class="step">
+      <h3><span lang="en">Measure and observe</span><span lang="pt">Medir e observar</span></h3>
+      <p lang="en">An arm-mounted MLX90614 infrared sensor takes skin temperature; cameras track urine volume and color in the collection bag over time.</p>
+      <p lang="pt">Um sensor infravermelho MLX90614 no braço mede a temperatura da pele; as câmeras acompanham volume e cor da urina na bolsa coletora ao longo do tempo.</p>
+      <span class="where"><span lang="en">on the robot</span><span lang="pt">no robô</span></span>
+    </div>
+    <div class="step">
+      <h3><span lang="en">Process at the edge</span><span lang="pt">Processar na borda</span></h3>
+      <p lang="en">A Jetson on the robot turns images into numbers and sends only a timestamped summary, with no images and no patient identity.</p>
+      <p lang="pt">Uma Jetson no robô transforma as imagens em números e envia só um resumo com horário, sem imagens e sem identificação do paciente.</p>
+      <span class="where">NVIDIA Jetson</span>
+    </div>
+    <div class="step">
+      <h3><span lang="en">Compare and flag</span><span lang="pt">Comparar e sinalizar</span></h3>
+      <p lang="en">A local AI workstation combines the summary with the patient's record and published scales (SIRS, NEWS2, SOFA) and flags trends for nurses to review.</p>
+      <p lang="pt">Uma estação local com IA junta o resumo ao prontuário e a escalas publicadas (SIRS, NEWS2, SOFA) e sinaliza tendências para a enfermagem avaliar.</p>
+      <span class="where"><span lang="en">local RTX workstation</span><span lang="pt">estação local com RTX</span></span>
+    </div>
+  </div>
+</div></section>
+
+<section id="sim"><div class="wrap">
+  <h2><span lang="en">Built simulation-first</span><span lang="pt">Construído primeiro em simulação</span></h2>
+  <p class="sub" lang="en">Every motion is planned and tested in a digital twin of an ICU before it runs on hardware. The ICU is built in NVIDIA Isaac Sim and Omniverse from SimReady hospital assets. ROS 2 and MoveIt 2 drive the simulated arms through the same driver used on the real arms.</p>
+  <p class="sub" lang="pt">Cada movimento é planejado e testado num gêmeo digital de UTI antes de rodar no hardware. A UTI é montada no NVIDIA Isaac Sim e no Omniverse com assets hospitalares SimReady. ROS 2 e MoveIt 2 movem os braços simulados pelo mesmo driver usado nos braços reais.</p>
+  <div class="gallery">
+    <figure class="shot" style="margin:0">
+      <img src="assets/img/head-camera.png" width="1280" height="720" loading="lazy" alt="Top view from the head depth camera: two robot arms over a hospital bed, passing a blue tube">
+      <figcaption><span lang="en">Head camera view (RealSense D435i, simulated): the two arms over the bed.</span><span lang="pt">Vista da câmera da cabeça (RealSense D435i, simulada): os dois braços sobre o leito.</span></figcaption>
+    </figure>
+    <figure class="shot" style="margin:0">
+      <img src="assets/img/icu-twin.png" width="1600" height="900" loading="lazy" alt="Simulated ICU room with two hospital beds, patient monitors and an IV pole">
+      <figcaption><span lang="en">The ICU digital twin: beds, monitors and IV pole from NVIDIA SimReady assets.</span><span lang="pt">O gêmeo digital da UTI: leitos, monitores e suporte de soro dos assets SimReady da NVIDIA.</span></figcaption>
+    </figure>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>2 + 3</b><span lang="en">robot arms and depth cameras (RoArm-M3-Pro, D435i, 2× HP60C)</span><span lang="pt">braços e câmeras de profundidade (RoArm-M3-Pro, D435i, 2× HP60C)</span></div>
+    <div class="stat"><b>0.39°</b><span lang="en">RMS joint tracking error, real time, in Isaac Sim</span><span lang="pt">erro rms de seguimento das juntas, em tempo real, no Isaac Sim</span></div>
+    <div class="stat"><b>0.06 ms</b><span lang="en">per solution of our 5-DOF IK, 100% of 10,000 test poses</span><span lang="pt">por solução da nossa IK de 5 GDL, 100% de 10 000 poses</span></div>
+    <div class="stat"><b>16/20</b><span lang="en">successful arm-to-arm handovers in physics simulation</span><span lang="pt">entregas entre os braços bem-sucedidas na física</span></div>
+  </div>
+</div></section>
+
+<section id="status"><div class="wrap">
+  <h2><span lang="en">Where we are</span><span lang="pt">Onde estamos</span></h2>
+  <p class="sub" lang="en">Honest status, updated November 2026. The sensing and alerting parts are still in development.</p>
+  <p class="sub" lang="pt">Estado real, atualizado em novembro de 2026. As partes de leitura dos sinais e de alerta ainda estão em desenvolvimento.</p>
+  <ul class="roadmap">
+    <li class="done"><span class="dot"></span><div><span lang="en">ICU digital twin in Isaac Sim with SimReady assets and the OpenAMRobot 2.0 mobile base</span><span lang="pt">Gêmeo digital da UTI no Isaac Sim com assets SimReady e a base móvel OpenAMRobot 2.0</span><small lang="en">Done</small><small lang="pt">Pronto</small></div></li>
+    <li class="done"><span class="dot"></span><div><span lang="en">Bimanual torso with MoveIt 2, our ros2_control driver and the same code in simulation and on hardware</span><span lang="pt">Torso bimanual com MoveIt 2, nosso driver ros2_control e o mesmo código na simulação e no hardware</span><small lang="en">Done in simulation</small><small lang="pt">Pronto em simulação</small></div></li>
+    <li class="doing"><span class="dot"></span><div><span lang="en">Move the robot software onto a Jetson Orin Nano Super and test the real arms</span><span lang="pt">Levar o software do robô para uma Jetson Orin Nano Super e testar os braços reais</span><small lang="en">In progress</small><small lang="pt">Em andamento</small></div></li>
+    <li class="next"><span class="dot"></span><div><span lang="en">Read monitor screens with a vision-language model; skin temperature; urine output and color</span><span lang="pt">Ler as telas dos monitores com um modelo de visão e linguagem; temperatura da pele; volume e cor da urina</span><small lang="en">Next</small><small lang="pt">Próximo</small></div></li>
+    <li class="next"><span class="dot"></span><div><span lang="en">Validate scales and thresholds with the medical team; ethics committee approval before any study with patients</span><span lang="pt">Validar escalas e limiares com a equipe médica; aprovação do comitê de ética antes de qualquer estudo com pacientes</span><small lang="en">Next</small><small lang="pt">Próximo</small></div></li>
+  </ul>
+</div></section>
+
+<section id="tech"><div class="wrap">
+  <h2><span lang="en">Technology</span><span lang="pt">Tecnologia</span></h2>
+  <div class="cards">
+    <div class="card">
+      <h3><span lang="en">NVIDIA, in use</span><span lang="pt">NVIDIA, em uso</span></h3>
+      <div class="tags"><span class="tag nv">Isaac Sim</span><span class="tag nv">Omniverse · OpenUSD</span><span class="tag nv">SimReady assets</span><span class="tag nv">PhysX</span><span class="tag nv">CUDA</span><span class="tag nv">RTX GPUs</span></div>
+    </div>
+    <div class="card">
+      <h3><span lang="en">NVIDIA, next</span><span lang="pt">NVIDIA, próximos</span></h3>
+      <div class="tags"><span class="tag nv">Jetson Orin Nano Super</span><span class="tag nv">Cosmos Reason</span><span class="tag nv">Isaac Lab</span><span class="tag nv">TensorRT</span><span class="tag nv">NIM · Nemotron</span><span class="tag nv">Isaac ROS</span></div>
+    </div>
+    <div class="card">
+      <h3><span lang="en">Robotics stack</span><span lang="pt">Robótica</span></h3>
+      <div class="tags"><span class="tag">ROS 2 Jazzy</span><span class="tag">MoveIt 2</span><span class="tag">MoveIt Task Constructor</span><span class="tag">ros2_control</span><span class="tag">OpenAMRobot 2.0</span><span class="tag">Waveshare RoArm-M3-Pro</span><span class="tag">RealSense D435i</span><span class="tag">HP60C</span><span class="tag">MLX90614</span></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="safety"><div class="wrap">
+  <div class="notice">
+    <h3><span lang="en">Research use only</span><span lang="pt">Somente para pesquisa</span></h3>
+    <p lang="en" style="margin:0">ICU-GuardBot is a research prototype. It is not a medical device, it has not been cleared by ANVISA or any other regulator, and it is not used in patient care. It supports nurses; it does not diagnose and does not replace clinical judgment. Any study with patients will follow ethics committee approval and Brazil's data protection law (LGPD).</p>
+    <p lang="pt" style="margin:0">O ICU-GuardBot é um protótipo de pesquisa. Não é um dispositivo médico, não foi aprovado pela ANVISA nem por outro órgão regulador e não é usado na assistência a pacientes. Ele apoia a enfermagem; não faz diagnóstico e não substitui o julgamento clínico. Qualquer estudo com pacientes seguirá a aprovação do comitê de ética e a LGPD.</p>
+  </div>
+</div></section>
+
+<section id="team"><div class="wrap">
+  <h2><span lang="en">Team</span><span lang="pt">Equipe</span></h2>
+  <div class="cards">
+    <div class="card">
+      <h3>LABRIOT · UTFPR</h3>
+      <p lang="en">Laboratory at the Federal University of Technology – Paraná (UTFPR), Ponta Grossa campus, Brazil.</p>
+      <p lang="pt">Laboratório da Universidade Tecnológica Federal do Paraná (UTFPR), câmpus Ponta Grossa.</p>
+    </div>
+    <div class="card">
+      <h3>Itamar Iliuk</h3>
+      <p lang="en">Associate professor and <a href="https://developer.nvidia.com/omniverse/community#ix7qxf">NVIDIA Omniverse Ambassador</a>. ICU-GuardBot is his Ambassador project.</p>
+      <p lang="pt">Professor associado e <a href="https://developer.nvidia.com/omniverse/community#ix7qxf">NVIDIA Omniverse Ambassador</a>. O ICU-GuardBot é o seu projeto de Ambassador.</p>
+    </div>
+    <div class="card">
+      <h3><span lang="en">Related work</span><span lang="pt">Trabalho relacionado</span></h3>
+      <p lang="en"><a href="https://github.com/ItamarIliuk/industrial-gauge-monitor">Industrial Gauge Monitor</a>: reading analog instruments with NVIDIA Cosmos. The same idea will read patient monitor screens.</p>
+      <p lang="pt"><a href="https://github.com/ItamarIliuk/industrial-gauge-monitor">Industrial Gauge Monitor</a>: leitura de instrumentos analógicos com NVIDIA Cosmos. A mesma ideia vai ler as telas dos monitores.</p>
+    </div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <p>© 2026 LABRIOT · UTFPR Ponta Grossa</p>
+  <p lang="en">Hospital 3D assets: NVIDIA SimReady assets, CC BY 4.0. OpenAMRobot 2.0: software MIT, content CC BY 4.0. Product names are trademarks of their owners; this project is not endorsed by NVIDIA, Waveshare or Intel.</p>
+  <p lang="pt">Assets 3D hospitalares: NVIDIA SimReady assets, CC BY 4.0. OpenAMRobot 2.0: software MIT, conteúdo CC BY 4.0. Nomes de produtos são marcas dos seus donos; este projeto não é endossado pela NVIDIA, Waveshare ou Intel.</p>
+</div></footer>
+
+<script>
+(function(){
+  var html=document.documentElement;
+  function setLang(l){
+    html.lang=l;
+    document.querySelectorAll('[data-set-lang]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.setLang===l));});
+    try{localStorage.setItem('lang',l);}catch(e){}
+  }
+  var saved=null;
+  try{saved=localStorage.getItem('lang');}catch(e){}
+  if(!saved){saved=(navigator.language||'').toLowerCase().indexOf('pt')===0?'pt':'en';}
+  setLang(saved);
+  document.querySelectorAll('[data-set-lang]').forEach(function(b){b.addEventListener('click',function(){setLang(b.dataset.setLang);});});
+})();
+</script>
+</body>
+</html>
