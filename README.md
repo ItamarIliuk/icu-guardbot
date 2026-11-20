@@ -2,8 +2,8 @@
 
 Public project page: https://itamariliuk.github.io/icu-guardbot/
 
-ICU-GuardBot is a research robot that helps ICU nurses notice early signs of sepsis. It is developed at LABRIOT,
-UTFPR Ponta Grossa (Brazil), simulation-first with NVIDIA Isaac Sim and Omniverse, as an NVIDIA Omniverse
+ICU-GuardBot is a research robot that helps ICU nurses notice early signs of sepsis. It is developed at LABRIOT
+(Laboratório de Robótica e IoT), UTFPR Ponta Grossa (Brazil), simulation-first with NVIDIA Isaac Sim and Omniverse, as an NVIDIA Omniverse
 Ambassador project.
 
 **Research use only.** ICU-GuardBot is not a medical device, has not been cleared by ANVISA or any other
